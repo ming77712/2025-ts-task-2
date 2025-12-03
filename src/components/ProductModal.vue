@@ -90,7 +90,7 @@ watch(
   (newProduct) => {
     if (newProduct.id) {
       loadProduct(newProduct)
-      resetImages([newProduct.imageUrl, ...newProduct.imagesUrl])
+      resetImages([newProduct.imageUrl ?? '', ...(newProduct.imagesUrl ?? [])])
     } else {
       loadProduct(null)
       resetImages([])
