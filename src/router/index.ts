@@ -6,6 +6,41 @@ const router = createRouter({
   routes: [
     {
       path: '/',
+      component: () => import('@/views/front/FrontLayout.vue'),
+      children: [
+        {
+          path: '',
+          component: () => import('../views/front/HomeView.vue'),
+        },
+        {
+          path: '/products',
+          name: 'products',
+          component: () => import('../views/front/ProductsView.vue'),
+        },
+        {
+          path: '/products/:id',
+          name: 'product-detail',
+          component: () => import('../views/front/ProductDetailView.vue'),
+        },
+        {
+          path: '/cart',
+          name: 'cart',
+          component: () => import('../views/front/CartView.vue'),
+        },
+        {
+          path: '/checkout',
+          name: 'checkout',
+          component: () => import('../views/front/CheckoutView.vue'),
+        },
+        {
+          path: '/checkout-success',
+          name: 'checkout-success',
+          component: () => import('../views/front/CheckoutSuccessView.vue'),
+        },
+      ],
+    },
+    {
+      path: '/admin',
       name: 'dashboard',
       component: Dashboard,
       children: [
@@ -27,6 +62,7 @@ const router = createRouter({
       component: () => import('@/views/Login.vue'),
     },
   ],
+
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
       return savedPosition
