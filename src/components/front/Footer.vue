@@ -4,12 +4,15 @@
   <div class="bg-dark py-5">
     <div class="container">
       <div class="d-flex align-items-center justify-content-between text-white mb-md-7 mb-4">
-        <img
-          class="img-fluid"
-          style="width: 3.75rem; height: 3.75rem"
-          src="@/assets/images/logo.webp"
-          alt="logo"
-        />
+        <RouterLink to="/">
+          <img
+            class="img-fluid"
+            style="width: 3.75rem; height: 3.75rem"
+            src="@/assets/images/logo.webp"
+            alt="logo"
+          />
+        </RouterLink>
+
         <ul class="d-flex list-unstyled mb-0 h4">
           <li>
             <a href="#" class="text-white mx-3"><i class="fab fa-facebook"></i></a>
@@ -29,7 +32,9 @@
           <p class="mb-0">02-3456-7890</p>
           <p class="mb-0">plantlife@mail.com</p>
         </div>
-        <RouterLink to="/login" class="text-white">後台管理 </RouterLink>
+        <RouterLink to="/login" class="text-white"
+          ><i class="fa-solid fa-user-group me-1"></i>後台管理</RouterLink
+        >
         <p class="mb-0">© 2025 植感生活 All Rights Reserved.</p>
       </div>
     </div>

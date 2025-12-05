@@ -13,7 +13,7 @@ import { RouterLink } from 'vue-router'
           <img
             class="img-fluid"
             style="width: 3.75rem; height: 3.75rem"
-            src="../assets/images/logo.webp"
+            src="@/assets/images/logo.webp"
             alt="logo"
           />
         </RouterLink>

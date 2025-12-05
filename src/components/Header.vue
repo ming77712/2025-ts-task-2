@@ -37,7 +37,7 @@ const handleLogout = async () => {
   } catch (error) {
   } finally {
     isProcessLogout.value = true
-    router.push('/login')
+    router.push('/')
   }
 }
 </script>

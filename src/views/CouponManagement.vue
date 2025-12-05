@@ -1,45 +1,22 @@
-<!--
-==========================================
-TypeScript 練習題目 - 商品管理頁面
-==========================================
-
-🎯 練習目標：
-1. 學習 Vue 3 組合式 API 的 TypeScript 用法
-2. 理解 Ref 和響應式資料的型別定義
-3. 練習 async/await 函式的型別註解
-
-📝 練習說明：
-請為以下 script setup 區塊加上正確的 TypeScript 型別註解
--->
-
 <script setup lang="ts">
-// TODO: 匯入 API 函式
-// 提示：從 @/api/products 匯入 apiDeleteProduct, apiGetProducts
-import { apiDeleteProduct, apiGetProducts } from '@/api/products'
+import { apiDeleteCoupon, apiGetCoupons } from '@/api/coupon'
 
 import DeleteModal from '@/components/DeleteModal.vue'
-import ProductModal from '@/components/ProductModal.vue'
+import CouponModal from '@/components/CouponModal.vue'
 
-// TODO: 匯入型別定義
-// 提示：從 @/types/product 匯入 Pagination, ProductData
-import type { Pagination, ProductData } from '@/types/product'
+import type { Pagination, CouponData } from '@/types/coupon'
 import { onMounted, ref, useTemplateRef } from 'vue'
 
-// TODO: 為模板引用加上型別註解
-// 提示：使用 useTemplateRef<InstanceType<typeof ProductModal>>()
-const productModalRef = useTemplateRef<InstanceType<typeof ProductModal>>('productModalRef')
+import { format } from 'date-fns'
+import { zhTW } from 'date-fns/locale'
+
+const couponModalRef = useTemplateRef<InstanceType<typeof CouponModal>>('couponModalRef')
 const deleteModalRef = useTemplateRef<InstanceType<typeof DeleteModal>>('deleteModalRef')
 
-// TODO: 為 currentPage 加上型別註解
-// 提示：使用 ref<string>()
 const currentPage = ref<string>('1')
 
-// TODO: 為 products 加上型別註解
-// 提示：使用 ref<ProductData[]>()
-const products = ref<ProductData[]>([])
+const coupons = ref<CouponData[]>([])
 
-// TODO: 為 pagination 加上型別註解
-// 提示：使用 ref<Pagination>()
 const pagination = ref<Pagination>({
   total_pages: 0,
   current_page: 0,
@@ -48,76 +25,67 @@ const pagination = ref<Pagination>({
   category: '',
 })
 
-const getProducts = async () => {
+const getCoupons = async () => {
   try {
-    const res = await apiGetProducts({
+    const res = await apiGetCoupons({
       page: currentPage.value,
     })
 
-    products.value = res.data.products
+    coupons.value = res.data.coupons
     pagination.value = res.data.pagination
   } catch (error) {
-    alert('取得產品列表失敗')
+    alert('取得優惠券列表失敗')
   }
 }
 onMounted(() => {
-  getProducts()
+  getCoupons()
 })
 
-// TODO: 為 getInitialProductData 函式加上型別註解
-// 提示：這個函式不接受參數，回傳 ProductData 型別
-const getInitialProductData = (): ProductData => ({
+const getInitialCouponData = (): CouponData => ({
   id: '',
   title: '',
-  origin_price: 0,
-  price: 0,
-  category: '',
-  unit: '',
-  num: 0,
-  content: '',
-  description: '',
   is_enabled: 1,
-  imageUrl: '',
-  imagesUrl: [''],
+  percent: 80,
+  due_date: 0,
+  code: '',
 })
 
-// TODO: 為 tempProduct 加上型別註解
-// 提示：使用 ref<ProductData>()
-const tempProduct = ref<ProductData>(getInitialProductData())
+const tempCoupon = ref<CouponData>(getInitialCouponData())
 
-// TODO: 為 openModal 函式加上型別註解
-// 提示：參數 product 的型別是 ProductData | null，預設值是 null，沒有回傳值
-const openModal = (product: ProductData | null = null): void => {
-  if (product) {
-    tempProduct.value = { ...product, imagesUrl: product.imagesUrl ? [...product.imagesUrl] : [''] }
+const openModal = (coupon: CouponData | null = null): void => {
+  if (coupon) {
+    tempCoupon.value = { ...coupon }
   }
 
-  productModalRef.value?.openModal()
+  couponModalRef.value?.openModal()
 }
 
-// TODO: 為 openDeleteModal 函式加上型別註解
-// 提示：參數 productId 是 string 型別，沒有回傳值
-const openDeleteModal = (productId: string): void => {
-  deleteModalRef.value?.openModal(() => handleDeleteProduct(productId))
+const openDeleteModal = (couponId: string): void => {
+  deleteModalRef.value?.openModal(() => handleDeleteCoupon(couponId))
 }
 
-// TODO: 為 handleDeleteProduct 函式加上型別註解
-// 提示：這是一個 async 函式，參數 productId 是 string 型別，回傳 Promise<void>
-const handleDeleteProduct = async (productId: string): Promise<void> => {
+// TODO: 刪除功能不正常，確認 id 欄位是否有問題
+const handleDeleteCoupon = async (couponId: string): Promise<void> => {
   try {
-    await apiDeleteProduct(productId)
+    await apiDeleteCoupon(couponId)
   } catch (error) {
-    alert('刪除商品失敗')
+    alert('刪除優惠券失敗')
   } finally {
-    getProducts()
+    getCoupons()
   }
+}
+
+function formatFromTimestamp(ts: number) {
+  return format(new Date(ts * 1000), 'yyyy/MM/dd HH:mm:ss', {
+    locale: zhTW,
+  })
 }
 </script>
 
 <template>
   <div class="d-flex justify-content-end align-items-center mb-4">
     <button @click="openModal(null)" type="button" class="btn btn-dark rounded-lg px-4 py-2">
-      <i class="fas fa-plus me-2"></i>新增商品
+      <i class="fas fa-plus me-2"></i>新增優惠券
     </button>
   </div>
   <div class="card shadow-sm rounded-lg flex-grow-1">
@@ -126,20 +94,19 @@ const handleDeleteProduct = async (productId: string): Promise<void> => {
         <table class="table table-hover align-middle">
           <thead>
             <tr>
-              <th scope="col">分類</th>
-              <th scope="col">商品名稱</th>
-              <th scope="col">原價</th>
-              <th scope="col">售價</th>
+              <th scope="col">優惠券名稱</th>
+              <th scope="col">折數</th>
+              <th scope="col">折扣碼</th>
               <th scope="col" class="text-center">啟用</th>
+              <th scope="col">有效期間</th>
               <th scope="col"></th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="product in products" :key="product.id">
-              <td>{{ product.category }}</td>
-              <td>{{ product.title }}</td>
-              <td>{{ product.origin_price }}</td>
-              <td>{{ product.price }}</td>
+            <tr v-for="coupon in coupons" :key="coupon.id">
+              <td>{{ coupon.title }}</td>
+              <td>{{ coupon.percent }}</td>
+              <td>{{ coupon.code }}</td>
               <td class="text-center">
                 <div
                   class="form-check form-switch d-flex justify-content-center align-items-center"
@@ -150,20 +117,23 @@ const handleDeleteProduct = async (productId: string): Promise<void> => {
                     style="pointer-events: none"
                     type="checkbox"
                     id="flexSwitchCheckDefault1"
-                    :checked="Boolean(product.is_enabled)"
+                    :checked="Boolean(coupon.is_enabled)"
                   />
                 </div>
               </td>
+              <td>
+                {{ formatFromTimestamp(coupon.due_date) }}
+              </td>
               <td class="text-nowrap">
                 <button
-                  @click="openModal(product)"
+                  @click="openModal(coupon)"
                   type="button"
                   class="btn btn-sm btn-outline-dark rounded-lg me-2"
                 >
                   編輯
                 </button>
                 <button
-                  @click="openDeleteModal(product.id)"
+                  @click="openDeleteModal(coupon.id)"
                   type="button"
                   class="btn btn-sm btn-outline-danger rounded-lg"
                 >
@@ -217,8 +187,8 @@ const handleDeleteProduct = async (productId: string): Promise<void> => {
     </div>
   </div>
 
-  <ProductModal ref="productModalRef" :product="tempProduct" @get-products="getProducts" />
-  <DeleteModal ref="deleteModalRef" title="刪除商品" content="確定要刪除該商品嗎？" />
+  <CouponModal ref="couponModalRef" :coupon="tempCoupon" @get-coupons="getCoupons" />
+  <DeleteModal ref="deleteModalRef" title="刪除優惠券" content="確定要刪除該優惠券嗎？" />
 </template>
 
 <style lang="scss" scoped></style>
